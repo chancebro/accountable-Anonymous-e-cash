@@ -1,4 +1,4 @@
-```
+
 Accountable Anonymous E-Cash — BLS12-381 Implementation
 
 This repository contains two independent implementations of an Accountable Anonymous E-Cash system:
@@ -166,5 +166,5 @@ Tracing benchmark is optimized for large-scale evaluation.
 Chanhyeong Cho
 Korea University — PET Lab
 Research Interests: Anonymous Payment, Accountable Privacy, E-Cash, AML/CTF-Aware Cryptography
-```
+
 
