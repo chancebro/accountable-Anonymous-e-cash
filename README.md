@@ -19,7 +19,6 @@ BLS12-381 Curve Sanity Test — verifies curve initialization and element sizes
 All cryptographic operations rely on the MCL library (BLS12-381), which is bundled in this repository.
 
 ## 📁 Project Structure
-.
 ├── mcl/ # MCL cryptographic library (bundled)
 │ ├── include/mcl/bn.hpp
 │ ├── lib/libmcl.a
