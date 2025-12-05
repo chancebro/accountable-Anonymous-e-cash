@@ -19,24 +19,25 @@ BLS12-381 Curve Sanity Test — verifies curve initialization and element sizes
 All cryptographic operations rely on the MCL library (BLS12-381), which is bundled in this repository.
 
 ## 📁 Project Structure
+```text
 .
-📁 mcl/                      
-│   ├── include/mcl/bn.hpp
-│   ├── lib/libmcl.a
-│   └── ...
+├── mcl/ # MCL cryptographic library (bundled)
+│ ├── include/mcl/bn.hpp
+│ ├── lib/libmcl.a
+│ └── ...
 │
-📄 new.cpp / new.h           
-📄 main_new.cpp              
+├── new.cpp / new.h # Our BLS12-381 optimized scheme
+├── main_new.cpp # Entry point for our implementation
 │
-📄 target.cpp / target.h     
-📄 main_target.cpp           
+├── target.cpp / target.h # Target (reference) scheme
+├── main_target.cpp # Entry point for the target scheme
 │
-📄 tracing_test.cpp          
-📄 test_bls381.cpp           
+├── tracing_test.cpp # Forward/Backward tracing benchmark
+├── test_bls381.cpp # Curve initialization and size test
 │
-🛠️ Makefile
-📝 README.md
-
+├── Makefile
+└── README.md
+```
 
 ⚙️ Build Instructions
 
