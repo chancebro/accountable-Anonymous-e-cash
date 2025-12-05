@@ -98,7 +98,7 @@ DOI: 10.1109/TMC.2021.3135301
 
 <hr>
 
-<h3>2) Our Improved Scheme — Selective Tracing + BLS12-381</h3>
+<h3>2) Our Improved Scheme — Accountable Anonymity + Selective Tracing </h3>
 
 <p><code>./main_new</code></p>
 
@@ -146,46 +146,95 @@ DOI: 10.1109/TMC.2021.3135301
 
 <h2>💾 Database Schema (Ledger Records)</h2>
 
-<p>Ledger records differ depending on whether a coin is <b>Randomised</b> or <b>Finalised</b>.</p>
+<p>
+The ledger records are stored in a single table <code>spk_bundle</code>.  
+This schema is used for both <strong>Randomise</strong> and <strong>Finalise</strong> phases.  
+Unused fields in a phase are stored as the literal string <code>"none"</code>.
+</p>
 
-<h3>🔷 Randomise Phase (new coin created)</h3>
+<h3>Table Schema</h3>
 
-<table border="1" cellpadding="4">
+<pre><code class="language-sql">
+CREATE TABLE IF NOT EXISTS spk_bundle (
+    Ts_num           INTEGER PRIMARY KEY AUTOINCREMENT,
+    S                TEXT,
+    D                TEXT,
+    INFO             TEXT,
+    R                TEXT,
+    N                TEXT,
+    M                TEXT,
+    T                TEXT,
+    backward_C1      TEXT,
+    backward_C2      TEXT,
+    bank_B           TEXT,
+    forward_C1       TEXT,
+    forward_C2       TEXT,
+    userID_payer_C1  TEXT,
+    userID_payer_C2  TEXT,
+    userID_payee_C1  TEXT,
+    userID_payee_C2  TEXT
+);
+</code></pre>
+
+<h3>Indexes for Tracing & Double-Spending Detection</h3>
+
+<pre><code class="language-sql">
+CREATE INDEX IF NOT EXISTS idx_S      ON spk_bundle (S);
+CREATE INDEX IF NOT EXISTS idx_T      ON spk_bundle (T);
+CREATE INDEX IF NOT EXISTS idx_bank_B ON spk_bundle (bank_B);
+CREATE INDEX IF NOT EXISTS idx_R      ON spk_bundle (R);
+</code></pre>
+
+<h3>User Table</h3>
+
+<pre><code class="language-sql">
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    U  TEXT
+);
+</code></pre>
+
+<h3>Field Descriptions</h3>
+
+<table>
 <tr><th>Column</th><th>Description</th></tr>
-<tr><td>S</td><td>SPK1 pairing proof</td></tr>
-<tr><td>D</td><td>SPK2 output</td></tr>
-<tr><td>INFO</td><td>tracing metadata</td></tr>
-<tr><td>N</td><td>coin randomness</td></tr>
-<tr><td>M</td><td>message metadata</td></tr>
-<tr><td>T</td><td>tracing tag</td></tr>
-<tr><td>userID_payer_C1</td><td>encrypted payer ID (part 1)</td></tr>
-<tr><td>userID_payer_C2</td><td>encrypted payer ID (part 2)</td></tr>
-<tr><td>userID_payee_C1</td><td>encrypted payee ID (part 1)</td></tr>
-<tr><td>userID_payee_C2</td><td>encrypted payee ID (part 2)</td></tr>
-<tr><td>new_coin</td><td>commitment of newly generated coin</td></tr>
+
+<tr><td><code>Ts_num</code></td><td>Auto-incremented logical transaction number</td></tr>
+<tr><td><code>S</code></td><td>SPK1 proof element (used for double-spending detection)</td></tr>
+<tr><td><code>D</code></td><td>SPK2 output associated with the coin/tracing state</td></tr>
+<tr><td><code>INFO</code></td><td>Metadata for tracing (e.g., AML policy context)</td></tr>
+<tr><td><code>R</code></td><td>Commitment representing the "new coin" after Randomise</td></tr>
+<tr><td><code>N</code></td><td>Random nonce used in coin formation</td></tr>
+<tr><td><code>M</code></td><td>Transaction message metadata</td></tr>
+<tr><td><code>T</code></td><td>Tracing tag used in selective tracing</td></tr>
+
+<tr><td><code>backward_C1</code></td><td>Backward ciphertext component 1 (Backward Tracing)</td></tr>
+<tr><td><code>backward_C2</code></td><td>Backward ciphertext component 2</td></tr>
+
+<tr><td><code>bank_B</code></td><td>Bank-side forward-tracing anchor (set to <code>"none"</code> during Finalise)</td></tr>
+<tr><td><code>forward_C1</code></td><td>Forward ciphertext component 1</td></tr>
+<tr><td><code>forward_C2</code></td><td>Forward ciphertext component 2</td></tr>
+
+<tr><td><code>userID_payer_C1</code></td><td>Encrypted payer identity — part 1</td></tr>
+<tr><td><code>userID_payer_C2</code></td><td>Encrypted payer identity — part 2</td></tr>
+<tr><td><code>userID_payee_C1</code></td><td>Encrypted payee identity — part 1</td></tr>
+<tr><td><code>userID_payee_C2</code></td><td>Encrypted payee identity — part 2</td></tr>
+
 </table>
 
-<h3>🔷 Finalise Phase (coin consumed)</h3>
+<h3>Phase-Specific Usage</h3>
 
-<p><code>new_coin = "none"</code></p>
+<h4>🔷 Randomise Phase (new coin created)</h4>
+<ul>
+<li><code>R</code> stores the committed new coin.</li>
+<li><code>bank_B</code>, <code>forward_C1</code>, <code>forward_C2</code> contain valid forward-tag fields.</li>
+</ul>
 
-<table border="1" cellpadding="4">
-<tr><th>Column</th><th>Description</th></tr>
-<tr><td>S</td><td>SPK1 proof</td></tr>
-<tr><td>D</td><td>SPK2 proof</td></tr>
-<tr><td>INFO</td><td>metadata</td></tr>
-<tr><td>N</td><td>randomness</td></tr>
-<tr><td>M</td><td>message</td></tr>
-<tr><td>T</td><td>tracing tag</td></tr>
-<tr><td>userID_payer_C1</td><td>payer ciphertext (part 1)</td></tr>
-<tr><td>userID_payer_C2</td><td>payer ciphertext (part 2)</td></tr>
-<tr><td>userID_payee_C1</td><td>payee ciphertext (part 1)</td></tr>
-<tr><td>userID_payee_C2</td><td>payee ciphertext (part 2)</td></tr>
-<tr><td>new_coin</td><td>"none"</td></tr>
-</table>
-
-<hr>
-
+<h4>🔷 Finalise Phase (coin consumed)</h4>
+<ul>
+<li>No new coin is generated.</li>
+<li><code>bank_B</code>, <code>forward_C1</code>, <code>forward_C2</code> are stored as <code>"none"</code>.</li>
+</ul>
 <h2>📦 MCL Library Usage</h2>
 
 <p>This repository includes a pre-built MCL library:</p>
