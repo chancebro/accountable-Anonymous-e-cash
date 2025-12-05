@@ -1,0 +1,25 @@
+# Build outputs
+*.o
+*.a
+*.so
+old
+main_new
+tracing_test
+
+# Databases
+*.db
+
+# CSV results
+*.csv
+
+# MCL build directories
+mcl/obj/
+mcl/bin/
+mcl/lib/*.a
+mcl/lib/*.so
+
+# VSCode settings
+.vscode/
+
+# OS
+.DS_Store
